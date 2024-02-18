@@ -9,20 +9,19 @@ To set up and run the project locally, follow these steps:
 1. Clone the repository to your local machine.
 2. Navigate to the project directory.
 3. Install dependencies using npm:
-
-    bash
-    npm install
+```
+npm install
+```
 
 4. Create a `.env` file in the root directory and add your Gemini API key:
-
-    bash
-    GEMINI_API_KEY=YOUR_API_KEY
+```
+GEMINI_API_KEY=YOUR_API_KEY
+```
 
 5. Run the project using npm:
-
-    bash
-    npm run start
-
+```
+npm run start
+```
 
 ## Contributing
 
