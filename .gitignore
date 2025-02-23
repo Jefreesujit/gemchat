@@ -3,3 +3,9 @@
 
 # environment file
 .env
+
+# git
+.git
+
+# dist
+/dist

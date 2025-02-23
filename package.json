@@ -1,11 +1,12 @@
 {
     "name": "gemchat",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "description": "A simple CLI based chatbot powered by Gemini",
     "main": "index.ts",
     "scripts": {
       "test": "echo \"Error: no test specified\" && exit 1",
-      "start": "ts-node index.ts"
+      "start": "ts-node index.ts",
+      "build": "tsc"
     },
     "repository": "https://github.com/jefreesujit/gemchat",
     "keywords": [
@@ -17,12 +18,13 @@
     "license": "MIT",
     "devDependencies": {
       "@types/node": "^20.11.19",
-      "dotenv": "^16.4.4",
       "typescript": "^5.3.3"
     },
     "dependencies": {
       "@google/generative-ai": "^0.2.1",
       "ts-node": "^10.9.2"
+    },
+    "bin": {
+      "gemchat": "./dist/index.js"
     }
   }
-  
