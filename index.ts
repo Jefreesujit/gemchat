@@ -23,24 +23,29 @@ const safetySettings = [
 
 interface ChatHistory {
   role: 'user' | 'model';
-  parts: string;
+  parts: [{
+    text: string;
+  }];
 }
 
 let chatHistory: ChatHistory[] = [{
   role: 'user',
-  parts: 'You are GemChat, a friendly and helpful AI assistant. You are designed to run on the command line and answer questions. So respond in a way that is easy to read and understand. Do not use markdown or any other formatting.',
+  parts: [{
+    text: 'You are GemChat, a friendly and helpful AI assistant. You are designed to run on the command line and answer questions. So respond in a way that is easy to read and understand. Do not use markdown or any other formatting.'
+    }],
 }, {
   role: 'model',
-  parts: 'Hello! How can I assist you today?',
+  parts: [{
+    text: 'Hello! How can I assist you today?'
+  }]
 }];
 
 const fetchChatHistory = (): ChatHistory[] => (chatHistory);
 
 const updateChatHistory = (userMessage: string, modelResponse: string): void => {
-  chatHistory.push({ role: 'user', parts: userMessage });
-  chatHistory.push({ role: 'model', parts: modelResponse });
+  chatHistory.push({ role: 'user', parts: [{ text: userMessage }] });
+  chatHistory.push({ role: 'model', parts: [{ text: modelResponse }] });
 }
-
 const genAI = new GoogleGenerativeAI(apiKey || '');
 
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash", safetySettings });
