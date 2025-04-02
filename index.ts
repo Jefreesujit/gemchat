@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
+import { GoogleGenAI } from '@google/genai';
 import * as readline from "readline";
 
 const rl = readline.createInterface({
@@ -10,19 +10,8 @@ const rl = readline.createInterface({
 
 let apiKey: string | undefined = process.env.GEMINI_API_KEY;
 
-const safetySettings = [
-  {
-    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-    threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-  },
-  {
-    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-  },
-];
-
 interface ChatHistory {
-  role: 'user' | 'model';
+  role: 'user' | 'model' | 'tool';
   parts: [{
     text: string;
   }];
@@ -46,32 +35,61 @@ const updateChatHistory = (userMessage: string, modelResponse: string): void => 
   chatHistory.push({ role: 'user', parts: [{ text: userMessage }] });
   chatHistory.push({ role: 'model', parts: [{ text: modelResponse }] });
 }
-const genAI = new GoogleGenerativeAI(apiKey || '');
+const genAI = new GoogleGenAI({ apiKey: apiKey || '' });
 
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash", safetySettings });
+const loggerFunctionDeclaration = {
+  name: "logger",
+  description: "Logs a message to the console",
+  parameters: {
+    type: "object",
+    properties: {
+      message: {
+        type: "string",
+        description: "The message to log to the console"
+      }
+    }
+  }
+}
 
-const sendMessage = async (message: string): Promise<string> => {
+const loggerFunction = ({ message }: { message: string }): void => {
+  console.log(`[LOG] ${new Date().toISOString()}]: ${message}`);
+}
+
+// Define a type for the function map
+type FunctionMap = {
+  [key: string]: (loggerArgs: any) => void;
+};
+
+const funcCallMap: FunctionMap = {
+  logger: loggerFunction
+};
+
+const sendMessage = async (message: string) => {
   const userHistory = fetchChatHistory();
-  const chat = model.startChat({
-    history: userHistory || [],
-    generationConfig: {
-      maxOutputTokens: 1000,
+  userHistory.push({ role: 'user', parts: [{ text: message }] });
+  const response = await genAI.models.generateContent({
+    model: 'gemini-2.0-flash',
+    contents: chatHistory.map((msg) => `${msg.role}: ${msg.parts[0].text}`).join('\n'),
+    config: {
+      tools: [{
+        // @ts-ignore
+        functionDeclarations: [loggerFunctionDeclaration]
+      }],
     },
   });
 
-  const result = await chat.sendMessageStream(message);
-  let fullResponse = '';
-  process.stdout.write("AI: ");
-
-  for await (const chunk of result.stream) {
-    const chunkText = chunk.text();
-    process.stdout.write(chunkText);
-    fullResponse += chunkText;
+  if (response.functionCalls && response.functionCalls.length > 0) {
+    for (const funcCall of response.functionCalls) {
+      if (funcCall.name && funcCall.name in funcCallMap) {
+        funcCallMap[funcCall.name](funcCall.args);
+      }
+    }
+    chatHistory.push({ role: 'tool', parts: [{ text: response.functionCalls.map((call) => `${call.name}: ${call.args}`).join('\n') }] });
+  } else {
+    process.stdout.write("AI: ");
+    process.stdout.write(response.text || '');
+    chatHistory.push({ role: 'model', parts: [{ text: response.text || '' }] });
   }
-  process.stdout.write("\n");
-
-  updateChatHistory(message, fullResponse);
-  return fullResponse;
 };
 
 const askQuestion = (): void => {
