@@ -2,8 +2,9 @@ import { GoogleGenAI, FunctionCallingConfigMode } from '@google/genai';
 import * as readline from 'readline';
 
 /* -----------------Local Imports--------------- */
-import { systemPrompt, followUpPrompt } from './src/prompts';
+import { systemPrompt, followUpPrompt, errorHandlingPrompt } from './src/prompts';
 import { fileFunctionDeclarations, executeTool } from './src/tools';
+import { processResponse, validateToolCall } from './src/utils';
 
 /* -----------------Types--------------- */
 interface ChatHistory {
@@ -28,48 +29,26 @@ const rl = readline.createInterface({
 
 const chatHistory: ChatHistory[] = [{ role: 'system', content: systemPrompt }];
 
-const validateToolCall = (funcCall: any, params: any): boolean => {
-          // Validate required parameters
-    const declaration = fileFunctionDeclarations.find(decl => decl.name === funcCall.name);
-    if (declaration?.parameters?.required) {
-      const missingParams = declaration.parameters.required.filter(param => !params[param]);
-      if (missingParams.length > 0) {
-        throw new Error(`Missing required parameters for ${funcCall.name}: ${missingParams.join(', ')}`);
-      }
-    }
-
-    // For file creation/update operations, ensure content is not empty
-    if ((funcCall.name === 'createFile' || funcCall.name === 'updateFile') &&
-        (!params.content || (typeof params.content === 'string' && params.content.trim() === ''))) {
-      throw new Error(`Empty content provided for ${funcCall.name} operation`);
-    }
-
-    return true;
-};
-
-const processResponse = (response: any): string => {
-  // Get the response parts with type checking
-  const candidates = response.candidates;
-  if (!candidates || candidates.length === 0) {
-    throw new Error('No response candidates received');
+const generateContent = async ({ toolCalling = false }: { toolCalling?: boolean } = {}) => {
+  const generateConfig = {
+    model: 'gemini-2.0-flash-001',
+    contents: chatHistory.map((msg) => `${msg.role}: ${msg.content}`).join('\n'),
+    config: {}
   }
 
-  const content = candidates[0].content;
-  if (!content || !content.parts) {
-    throw new Error('Invalid response content structure');
+  if (toolCalling) {
+    generateConfig.config = {
+      toolConfig: {
+        functionCallingConfig: {
+          mode: FunctionCallingConfigMode.ANY,
+          allowedFunctionNames: fileFunctionDeclarations.map((decl) => decl.name!),
+        },
+      },
+      tools: [{ functionDeclarations: fileFunctionDeclarations }],
+    };
   }
 
-  const responseParts = content.parts;
-  let textResponse = '';
-
-  // Process each part of the response
-  for (const part of responseParts) {
-    if (part?.text) {
-      textResponse += part.text;
-    }
-  }
-
-  return textResponse;
+  return await genAI.models.generateContent(generateConfig);
 };
 
 async function processInput(input: string) {
@@ -77,19 +56,7 @@ async function processInput(input: string) {
 
   try {
     console.log('[DEBUG] Sending request to AI with input:', input);
-    const response = await genAI.models.generateContent({
-      model: 'gemini-2.0-flash-001',
-      contents: chatHistory.map((msg) => `${msg.role}: ${msg.content}`).join('\n'),
-      config: {
-        toolConfig: {
-          functionCallingConfig: {
-            mode: FunctionCallingConfigMode.ANY,
-            allowedFunctionNames: fileFunctionDeclarations.map((decl) => decl.name!),
-          },
-        },
-        tools: [{ functionDeclarations: fileFunctionDeclarations }],
-      },
-    });
+    const response = await generateContent({ toolCalling: true });
 
     console.log('[DEBUG] AI Response:', JSON.stringify(response.candidates, null, 2));
     console.log('[DEBUG] Function Calls:', JSON.stringify(response.functionCalls, null, 2));
@@ -107,21 +74,18 @@ async function processInput(input: string) {
       // Execute each function call in sequence
       for (const funcCall of response.functionCalls) {
         console.log('[DEBUG] Function Call:', JSON.stringify(funcCall, null, 2));
+        const { args = {} } = funcCall;
 
-        // Extract parameters from any of the possible properties
-        const params = funcCall.args || {};
+        validateToolCall(funcCall, args);
 
-        validateToolCall(funcCall, params);
-
-        console.log(`[LOG] Executing tool: ${funcCall.name} with parameters:`, JSON.stringify(params, null, 2));
-        const toolResult = await executeTool(funcCall.name!, params);
+        console.log(`[LOG] Executing tool: ${funcCall.name} with parameters:`, JSON.stringify(args, null, 2));
+        const toolResult = await executeTool(funcCall.name!, args);
         console.log('[LOG] Tool result:', toolResult);
 
         if (!toolResult.success) {
           throw new Error(`Tool execution failed: ${toolResult.error}`);
         }
 
-        // Append tool result to chat history
         chatHistory.push({
           role: 'tool',
           name: funcCall.name,
@@ -133,16 +97,8 @@ async function processInput(input: string) {
           content: followUpPrompt
         });
 
-        const followUpResponse = await genAI.models.generateContent({
-          model: 'gemini-2.0-flash-001',
-          contents: chatHistory.map((msg) => `${msg.role}: ${msg.content}`).join('\n'),
-          config: {
-            tools: [{ functionDeclarations: fileFunctionDeclarations }],
-          },
-        });
-
+        const followUpResponse = await generateContent({ toolCalling: false });
         const followUpText = processResponse(followUpResponse);
-
         if (followUpText) {
           console.log('AI:', followUpText);
           chatHistory.push({ role: 'assistant', content: followUpText });
@@ -154,16 +110,23 @@ async function processInput(input: string) {
     }
   } catch (error: any) {
     console.error('Error processing request:', error.message);
+    chatHistory.push({ role: 'assistant', content: `${errorHandlingPrompt}\n${error.message}` });
+    const errorResponse = await generateContent({ toolCalling: false });
+    const errorText = processResponse(errorResponse);
+    if (errorText) {
+      console.log('AI:', errorText);
+      chatHistory.push({ role: 'assistant', content: errorText });
+    }
   }
 }
 
-console.log('Welcome to the GemChat CLI Chatbot with file system tools.');
+console.log('Welcome to the GemChat, AI powered CLI Chatbot with file system capabilities.');
 rl.prompt();
 
 rl.on('line', async (line) => {
   await processInput(line.trim());
   rl.prompt();
 }).on('close', () => {
-  console.log('Exiting chatbot. Goodbye!');
+  console.log('Exiting GemChat. Goodbye!');
   process.exit(0);
 });
