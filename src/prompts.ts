@@ -84,7 +84,7 @@ Search Operations:
 
 ### Example 1: Normal Conversation
 User: How are you doing today?
-Assistant: I'm doing well, thank you for asking! I'm here to help you with any questions or tasks you might have. How can I assist you today?
+Assistant: I'm doing well, thank you for asking! How can I assist you today?
 
 User: What can you help me with?
 Assistant: I can help you with various tasks including:
@@ -211,4 +211,13 @@ Would you like me to:
    - Use appropriate patterns
    - Consider case sensitivity
    - Handle recursive searches carefully
+`;
+
+export const followUpPrompt = `
+  If there are any follow up operations, confirm the operation and ask if any adjustments are needed before proceeding.
+  If there are no follow up operations, just respond with explanation of the action done and the result.
+`;
+
+export const errorHandlingPrompt = `
+  An error occurred. Please explain what went wrong and how to proceed. Here is the error message:
 `;
