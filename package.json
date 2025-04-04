@@ -1,15 +1,11 @@
 {
   "name": "gemchat",
-  "version": "1.0.3",
-  "description": "A simple CLI based chatbot powered by Gemini",
+  "version": "2.0.0",
+  "description": "AI powered CLI assistant with file system capabilities",
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node index.ts",
-    "gemchat": "ts-node llmchat.ts",
-    "openchat": "ts-node openai.ts",
-    "geminichat": "ts-node langGemini.ts",
-    "toolchat": "ts-node toolchat.ts",
     "build": "tsc",
     "prepare": "npm run build"
   },
@@ -28,12 +24,6 @@
   "dependencies": {
     "@google/genai": "^0.7.0",
     "@google/generative-ai": "^0.24.0",
-    "@langchain/community": "^0.0.49",
-    "@langchain/core": "^0.1.58",
-    "@langchain/google-genai": "^0.0.10",
-    "@langchain/openai": "^0.0.28",
-    "langchain": "^0.1.33",
-    "openai-edge": "^1.2.2",
     "ts-node": "^10.9.2"
   },
   "bin": {
