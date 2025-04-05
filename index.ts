@@ -4,14 +4,12 @@ import * as readline from 'readline';
 /* -----------------Local Imports--------------- */
 import { systemPrompt, followUpPrompt, errorHandlingPrompt } from './src/prompts';
 import { fileFunctionDeclarations, executeTool } from './src/tools';
-import { processResponse, validateToolCall } from './src/utils';
-
-/* -----------------Types--------------- */
-interface ChatHistory {
-  role: 'system' | 'user' | 'tool' | 'assistant';
-  name?: string;
-  content: string;
-}
+import {
+  processResponse,
+  validateToolCall,
+  ChatHistory,
+  saveChatHistory
+} from './src/utils';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 if (!GEMINI_API_KEY) {
@@ -28,6 +26,15 @@ const rl = readline.createInterface({
 });
 
 const chatHistory: ChatHistory[] = [{ role: 'system', content: systemPrompt }];
+
+function addChatMessage(role: ChatHistory['role'], content: string, name?: string) {
+  chatHistory.push({
+    role,
+    name,
+    content,
+    timestamp: Date.now()
+  });
+}
 
 const generateContent = async ({ toolCalling = false }: { toolCalling?: boolean } = {}) => {
   const generateConfig = {
@@ -52,7 +59,7 @@ const generateContent = async ({ toolCalling = false }: { toolCalling?: boolean 
 };
 
 async function processInput(input: string) {
-  chatHistory.push({ role: 'user', content: input });
+  addChatMessage('user', input);
 
   try {
     console.log('[DEBUG] Sending request to AI with input:', input);
@@ -68,7 +75,7 @@ async function processInput(input: string) {
       // Show initial explanation
       if (textResponse) {
         console.log('AI:', textResponse);
-        chatHistory.push({ role: 'assistant', content: textResponse });
+        addChatMessage('assistant', textResponse);
       }
 
       // Execute each function call in sequence
@@ -85,37 +92,28 @@ async function processInput(input: string) {
         if (!toolResult.success) {
           throw new Error(`Tool execution failed: ${toolResult.error}`);
         }
-
-        chatHistory.push({
-          role: 'tool',
-          name: funcCall.name,
-          content: JSON.stringify(toolResult),
-        });
-
-        chatHistory.push({
-          role: 'system',
-          content: followUpPrompt
-        });
+        addChatMessage('tool', JSON.stringify(toolResult), funcCall.name);
+        addChatMessage('system', followUpPrompt);
 
         const followUpResponse = await generateContent({ toolCalling: false });
         const followUpText = processResponse(followUpResponse);
         if (followUpText) {
           console.log('AI:', followUpText);
-          chatHistory.push({ role: 'assistant', content: followUpText });
+          addChatMessage('assistant', followUpText);
         }
       }
     } else {
       console.log('AI:', textResponse);
-      chatHistory.push({ role: 'assistant', content: textResponse });
+      addChatMessage('assistant', textResponse);
     }
   } catch (error: any) {
     console.error('Error processing request:', error.message);
-    chatHistory.push({ role: 'assistant', content: `${errorHandlingPrompt}\n${error.message}` });
+    addChatMessage('assistant', `${errorHandlingPrompt}\n${error.message}`);
     const errorResponse = await generateContent({ toolCalling: false });
     const errorText = processResponse(errorResponse);
     if (errorText) {
       console.log('AI:', errorText);
-      chatHistory.push({ role: 'assistant', content: errorText });
+      addChatMessage('assistant', errorText);
     }
   }
 }
@@ -126,7 +124,9 @@ rl.prompt();
 rl.on('line', async (line) => {
   await processInput(line.trim());
   rl.prompt();
-}).on('close', () => {
+}).on('close', async () => {
+  console.log('\nSaving chat history before exit...');
+  await saveChatHistory(chatHistory);
   console.log('Exiting GemChat. Goodbye!');
   process.exit(0);
 });
