@@ -85,7 +85,7 @@ async function processInput(input: string) {
 
         validateToolCall(funcCall, args);
 
-        console.log(`[LOG] Executing tool: ${funcCall.name} with parameters:`, JSON.stringify(args, null, 2));
+        // console.log(`[LOG] Executing tool: ${funcCall.name} with parameters:`, JSON.stringify(args, null, 2));
         const toolResult = await executeTool(funcCall.name!, args);
         // console.log('[LOG] Tool result:', toolResult);
 
