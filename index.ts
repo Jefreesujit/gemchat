@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { GoogleGenAI, FunctionCallingConfigMode } from '@google/genai';
 import * as readline from 'readline';
 
