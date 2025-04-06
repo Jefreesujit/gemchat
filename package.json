@@ -1,30 +1,32 @@
 {
-    "name": "gemchat",
-    "version": "1.0.3",
-    "description": "A simple CLI based chatbot powered by Gemini",
-    "main": "index.ts",
-    "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1",
-      "start": "ts-node index.ts",
-      "build": "tsc"
-    },
-    "repository": "https://github.com/jefreesujit/gemchat",
-    "keywords": [
-      "ai",
-      "chat",
-      "gemini"
-    ],
-    "author": "Jefreesujit",
-    "license": "MIT",
-    "devDependencies": {
-      "@types/node": "^20.11.19",
-      "typescript": "^5.3.3"
-    },
-    "dependencies": {
-      "@google/generative-ai": "^0.2.1",
-      "ts-node": "^10.9.2"
-    },
-    "bin": {
-      "gemchat": "./dist/index.js"
-    }
+  "name": "gemchat",
+  "version": "2.0.0",
+  "description": "AI powered CLI assistant with file system capabilities",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node index.ts",
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "ai",
+    "chat",
+    "gemini"
+  ],
+  "author": "Jefreesujit",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "dotenv": "^16.4.4",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@google/genai": "^0.7.0",
+    "@google/generative-ai": "^0.24.0",
+    "ts-node": "^10.9.2"
+  },
+  "bin": {
+    "gemchat": "./dist/index.js"
   }
+}
