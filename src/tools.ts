@@ -229,7 +229,7 @@ function listDirectoryTool(params: any = {}): any {
 }
 
 function readFileTool(params: any = {}): any {
-  console.log('[DEBUG] readFileTool called with params:', JSON.stringify(params, null, 2));
+  // console.log('[DEBUG] readFileTool called with params:', JSON.stringify(params, null, 2));
 
   // Validate parameters
   if (!params || typeof params !== 'object') {
@@ -237,14 +237,14 @@ function readFileTool(params: any = {}): any {
   }
 
   const fileName = params.fileName;
-  console.log('[DEBUG] Extracted fileName:', fileName);
+  // console.log('[DEBUG] Extracted fileName:', fileName);
 
   if (!fileName || typeof fileName !== 'string') {
     return { success: false, error: 'Invalid or missing fileName parameter' };
   }
 
   const fullPath = path.join(process.cwd(), fileName);
-  console.log('[DEBUG] Attempting to read file:', fullPath);
+  // console.log('[DEBUG] Attempting to read file:', fullPath);
 
   if (!fs.existsSync(fullPath)) {
     const similar = searchSimilarFiles(fileName);
