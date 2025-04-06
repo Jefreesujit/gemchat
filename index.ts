@@ -62,11 +62,11 @@ async function processInput(input: string) {
   addChatMessage('user', input);
 
   try {
-    console.log('[DEBUG] Sending request to AI with input:', input);
+    // console.log('[DEBUG] Sending request to AI with input:', input);
     const response = await generateContent({ toolCalling: true });
 
-    console.log('[DEBUG] AI Response:', JSON.stringify(response.candidates, null, 2));
-    console.log('[DEBUG] Function Calls:', JSON.stringify(response.functionCalls, null, 2));
+    // console.log('[DEBUG] AI Response:', JSON.stringify(response.candidates, null, 2));
+    // console.log('[DEBUG] Function Calls:', JSON.stringify(response.functionCalls, null, 2));
 
     const textResponse = processResponse(response);
 
@@ -80,14 +80,14 @@ async function processInput(input: string) {
 
       // Execute each function call in sequence
       for (const funcCall of response.functionCalls) {
-        console.log('[DEBUG] Function Call:', JSON.stringify(funcCall, null, 2));
+        // console.log('[DEBUG] Function Call:', JSON.stringify(funcCall, null, 2));
         const { args = {} } = funcCall;
 
         validateToolCall(funcCall, args);
 
         console.log(`[LOG] Executing tool: ${funcCall.name} with parameters:`, JSON.stringify(args, null, 2));
         const toolResult = await executeTool(funcCall.name!, args);
-        console.log('[LOG] Tool result:', toolResult);
+        // console.log('[LOG] Tool result:', toolResult);
 
         if (!toolResult.success) {
           throw new Error(`Tool execution failed: ${toolResult.error}`);
