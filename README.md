@@ -39,6 +39,16 @@ GemChat is a AI powered CLI assistant with file system capabilities. Built with 
    export GEMINI_API_KEY=your-api-key
    ```
 
+   **Optional Environment Variables**
+   ```bash
+   # Enable Langchain tracing (default: false)
+   export LANGCHAIN_TRACING=true
+
+   # Set Gemini model (default: 'gemini-2.0-flash')
+   # Options: 'gemini-2.0-flash', 'gemini-2.5-pro-exp-03-25', 'gemini-2.0-flash-thinking-exp-01-21'
+   export GEMINI_MODEL=gemini-2.0-flash
+   ```
+
 2. Run GemChat:
    ```bash
    npx gemchat

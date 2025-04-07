@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { GoogleGenAI, FunctionCallingConfigMode } from '@google/genai';
 import * as readline from 'readline';
+import { traceable } from 'langsmith/traceable';
+import { wrapSDK } from 'langsmith/wrappers';
 
 /* -----------------Local Imports--------------- */
 import { systemPrompt, followUpPrompt, errorHandlingPrompt } from './src/prompts';
@@ -13,12 +15,18 @@ import {
 } from './src/utils';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const LANGSMITH_API_KEY = process.env.LANGSMITH_API_KEY;
+
 if (!GEMINI_API_KEY) {
   console.error("Please set the GEMINI_API_KEY environment variable.");
   process.exit(1);
 }
 
-const genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+let genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+
+if (LANGSMITH_API_KEY) {
+  genAI = wrapSDK(genAI);
+}
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -37,9 +45,9 @@ function addChatMessage(role: ChatHistory['role'], content: string, name?: strin
   });
 }
 
-const generateContent = async ({ toolCalling = false }: { toolCalling?: boolean } = {}) => {
+const generateContent = traceable(async ({ toolCalling = false }: { toolCalling?: boolean } = {}) => {
   const generateConfig = {
-    model: 'gemini-2.0-flash-001',
+    model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
     contents: chatHistory.map((msg) => `${msg.role}: ${msg.content}`).join('\n'),
     config: {}
   }
@@ -57,7 +65,7 @@ const generateContent = async ({ toolCalling = false }: { toolCalling?: boolean 
   }
 
   return await genAI.models.generateContent(generateConfig);
-};
+});
 
 async function processInput(input: string) {
   addChatMessage('user', input);
@@ -119,7 +127,7 @@ async function processInput(input: string) {
   }
 }
 
-console.log('Welcome to the GemChat, AI powered CLI Chatbot with file system capabilities.');
+console.log('Welcome to the GemChat, AI powered CLI assistant with file system capabilities.');
 rl.prompt();
 
 rl.on('line', async (line) => {
