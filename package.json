@@ -24,6 +24,7 @@
   "dependencies": {
     "@google/genai": "^0.7.0",
     "@google/generative-ai": "^0.24.0",
+    "commander": "^13.1.0",
     "langsmith": "^0.3.15",
     "ts-node": "^10.9.2"
   },

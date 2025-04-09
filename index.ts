@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+
+/* -----------------Globals--------------- */
+import { Command } from 'commander';
 import { GoogleGenAI, FunctionCallingConfigMode } from '@google/genai';
 import * as readline from 'readline';
 import { traceable } from 'langsmith/traceable';
@@ -14,18 +17,38 @@ import {
   saveChatHistory
 } from './src/utils';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const LANGSMITH_API_KEY = process.env.LANGSMITH_API_KEY;
+// Initialize commander
+const program = new Command();
+
+program
+  .name('gemchat')
+  .description('AI powered CLI assistant with file system capabilities')
+  .version('2.0.2')
+  .option('-k, --key <key>', 'Gemini API key (can also use GEMINI_API_KEY env var)')
+  .option('-m, --model <name>', 'Gemini model to use', 'gemini-2.0-flash')
+  .option('-l, --langsmith-key <key>', 'LangSmith API key for tracing (can also use LANGSMITH_API_KEY env var)')
+  .option('-t, --tracing', 'Enable tracing with LangSmith', false)
+  .option('-h, --no-history', 'Disable chat history saving')
+  .parse();
+
+const options = program.opts();
+
+// Get API key from command line or environment
+const GEMINI_API_KEY = options.key || process.env.GEMINI_API_KEY;
+const LANGSMITH_API_KEY = options.langsmithKey || process.env.LANGSMITH_API_KEY;
 
 if (!GEMINI_API_KEY) {
-  console.error("Please set the GEMINI_API_KEY environment variable.");
+  console.error("Please provide Gemini API key via --key option or GEMINI_API_KEY environment variable");
   process.exit(1);
 }
 
 let genAI = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
-if (LANGSMITH_API_KEY) {
+// Setup LangSmith if enabled
+if (options.tracing && LANGSMITH_API_KEY) {
   genAI = wrapSDK(genAI);
+} else if (options.tracing && !LANGSMITH_API_KEY) {
+  console.warn("Tracing enabled but no LangSmith API key provided. Tracing will be disabled.");
 }
 
 const rl = readline.createInterface({
@@ -47,7 +70,7 @@ function addChatMessage(role: ChatHistory['role'], content: string, name?: strin
 
 const generateContent = traceable(async ({ toolCalling = false }: { toolCalling?: boolean } = {}) => {
   const generateConfig = {
-    model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+    model: options.model, // Use model from command line options
     contents: chatHistory.map((msg) => `${msg.role}: ${msg.content}`).join('\n'),
     config: {}
   }
@@ -119,15 +142,21 @@ async function processInput(input: string) {
   }
 }
 
-console.log('Welcome to the GemChat, AI powered CLI assistant with file system capabilities.');
+console.log('Welcome to GemChat, AI powered CLI assistant with file system capabilities.');
+console.log(`Using model: ${options.model}`);
+if (options.tracing) console.log('LangSmith tracing enabled');
+if (!options.history) console.log('Chat history saving disabled');
+
 rl.prompt();
 
 rl.on('line', async (line) => {
   await processInput(line.trim());
   rl.prompt();
 }).on('close', async () => {
-  console.log('\nSaving chat history before exit...');
-  await saveChatHistory(chatHistory);
+  if (options.history) {
+    console.log('\nSaving chat history before exit...');
+    await saveChatHistory(chatHistory);
+  }
   console.log('Exiting GemChat. Goodbye!');
   process.exit(0);
 });
