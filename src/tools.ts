@@ -2,6 +2,7 @@
 import { FunctionDeclaration, Type } from '@google/genai';
 import * as fs from 'fs';
 import * as path from 'path';
+import { traceable } from 'langsmith/traceable';
 
 /* -----------------Declarations--------------- */
 const listDirectoryDeclaration: FunctionDeclaration = {
@@ -185,19 +186,6 @@ const copyFileDeclaration: FunctionDeclaration = {
   },
 };
 
-export const fileFunctionDeclarations = [
-  listDirectoryDeclaration,
-  readFileDeclaration,
-  createFileDeclaration,
-  updateFileDeclaration,
-  createFolderDeclaration,
-  deleteFolderDeclaration,
-  renameFolderDeclaration,
-  searchFilesDeclaration,
-  moveFileDeclaration,
-  copyFileDeclaration,
-];
-
 /* -----------------Tools--------------- */
 
 function searchSimilarFiles(inputName: string): string[] {
@@ -208,7 +196,7 @@ function searchSimilarFiles(inputName: string): string[] {
   return files.filter(file => file.toLowerCase().includes(lowerInput));
 }
 
-function listDirectoryTool(params: any = {}): any {
+const listDirectoryTool = traceable((params: any = {}): any => {
   const directory = params?.directory || process.cwd();
   try {
     const items = fs.readdirSync(directory).map((item) => {
@@ -226,26 +214,18 @@ function listDirectoryTool(params: any = {}): any {
   } catch (error: any) {
     return { success: false, error: error.message };
   }
-}
+});
 
-function readFileTool(params: any = {}): any {
-  // console.log('[DEBUG] readFileTool called with params:', JSON.stringify(params, null, 2));
-
+const readFileTool = traceable((params: any = {}): any => {
   // Validate parameters
   if (!params || typeof params !== 'object') {
     return { success: false, error: 'Invalid parameters: expected an object' };
   }
-
   const fileName = params.fileName;
-  // console.log('[DEBUG] Extracted fileName:', fileName);
-
   if (!fileName || typeof fileName !== 'string') {
     return { success: false, error: 'Invalid or missing fileName parameter' };
   }
-
   const fullPath = path.join(process.cwd(), fileName);
-  // console.log('[DEBUG] Attempting to read file:', fullPath);
-
   if (!fs.existsSync(fullPath)) {
     const similar = searchSimilarFiles(fileName);
     return {
@@ -259,9 +239,9 @@ function readFileTool(params: any = {}): any {
   } catch (error: any) {
     return { success: false, error: error.message };
   }
-}
+});
 
-function createFileTool(params: any = {}): any {
+const createFileTool = traceable((params: any = {}): any => {
   const { fileName, content } = params;
   if (!fileName || content === undefined) {
     return { success: false, error: 'Missing fileName or content.' };
@@ -273,9 +253,9 @@ function createFileTool(params: any = {}): any {
   } catch (error: any) {
     return { success: false, error: error.message };
   }
-}
+});
 
-function updateFileTool(params: any = {}): any {
+const updateFileTool = traceable((params: any = {}): any => {
   const { fileName, content } = params;
   if (!fileName || content === undefined) {
     return { success: false, error: 'Missing fileName or content.' };
@@ -290,9 +270,9 @@ function updateFileTool(params: any = {}): any {
   } catch (error: any) {
     return { success: false, error: error.message };
   }
-}
+});
 
-function createFolderTool(params: any = {}): any {
+const createFolderTool = traceable((params: any = {}): any => {
   const { folderPath } = params;
   if (!folderPath) {
     return { success: false, error: 'Missing folderPath parameter.' };
@@ -304,9 +284,9 @@ function createFolderTool(params: any = {}): any {
   } catch (error: any) {
     return { success: false, error: error.message };
   }
-}
+});
 
-function deleteFolderTool(params: any = {}): any {
+const deleteFolderTool = traceable((params: any = {}): any => {
   const { folderPath, recursive = true } = params;
   if (!folderPath) {
     return { success: false, error: 'Missing folderPath parameter.' };
@@ -318,9 +298,9 @@ function deleteFolderTool(params: any = {}): any {
   } catch (error: any) {
     return { success: false, error: error.message };
   }
-}
+});
 
-function renameFolderTool(params: any = {}): any {
+const renameFolderTool = traceable((params: any = {}): any => {
   const { oldPath, newPath } = params;
   if (!oldPath || !newPath) {
     return { success: false, error: 'Missing oldPath or newPath parameter.' };
@@ -333,9 +313,9 @@ function renameFolderTool(params: any = {}): any {
   } catch (error: any) {
     return { success: false, error: error.message };
   }
-}
+});
 
-function searchFilesTool(params: any = {}): any {
+const searchFilesTool = traceable((params: any = {}): any => {
   const { directory = '.', pattern, recursive = true } = params;
   if (!pattern) {
     return { success: false, error: 'Missing pattern parameter.' };
@@ -364,9 +344,9 @@ function searchFilesTool(params: any = {}): any {
   } catch (error: any) {
     return { success: false, error: error.message };
   }
-}
+});
 
-function moveFileTool(params: any = {}): any {
+const moveFileTool = traceable((params: any = {}): any => {
   const { sourcePath, destinationPath } = params;
   if (!sourcePath || !destinationPath) {
     return { success: false, error: 'Missing sourcePath or destinationPath parameter.' };
@@ -379,9 +359,9 @@ function moveFileTool(params: any = {}): any {
   } catch (error: any) {
     return { success: false, error: error.message };
   }
-}
+});
 
-function copyFileTool(params: any = {}): any {
+const copyFileTool = traceable((params: any = {}): any => {
   const { sourcePath, destinationPath } = params;
   if (!sourcePath || !destinationPath) {
     return { success: false, error: 'Missing sourcePath or destinationPath parameter.' };
@@ -394,7 +374,7 @@ function copyFileTool(params: any = {}): any {
   } catch (error: any) {
     return { success: false, error: error.message };
   }
-}
+});
 
 export async function executeTool(functionName: string, params: any): Promise<any> {
   switch (functionName) {
@@ -422,3 +402,16 @@ export async function executeTool(functionName: string, params: any): Promise<an
       return { success: false, error: 'Unknown function call.' };
   }
 }
+
+export const fileFunctionDeclarations = [
+  listDirectoryDeclaration,
+  readFileDeclaration,
+  createFileDeclaration,
+  updateFileDeclaration,
+  createFolderDeclaration,
+  deleteFolderDeclaration,
+  renameFolderDeclaration,
+  searchFilesDeclaration,
+  moveFileDeclaration,
+  copyFileDeclaration,
+];
