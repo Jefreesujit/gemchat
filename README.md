@@ -19,29 +19,56 @@ GemChat is a AI powered CLI assistant with file system capabilities. Built with 
 
 ## Installation & Setup
 
-1. Set up your Gemini API key using one of these methods:
+1. Install GemChat globally:
+```bash
+npm install -g gemchat
+```
 
-   **Option 1: Environment file**
+2. Set up your Gemini API key using one of these methods:
+
+**Option 1: Shell configuration**
+```bash
+# Add to .bashrc or .zshrc
+echo 'export GEMINI_API_KEY=your-api-key' >> ~/.bashrc
+source ~/.bashrc
+```
+
+**Option 2: Direct export**
+```bash
+export GEMINI_API_KEY=your-api-key
+```
+
+3. Run GemChat with available options:
    ```bash
-   # Create a .env file in the project root
-   echo "GEMINI_API_KEY=your-api-key" > .env
+   gemchat [options]
    ```
 
-   **Option 2: Shell configuration**
+   Alternatively, you can run without installing globally using npx:
    ```bash
-   # Add to .bashrc or .zshrc
-   echo 'export GEMINI_API_KEY=your-api-key' >> ~/.bashrc
-   source ~/.bashrc
+   npx gemchat [options]
    ```
 
-   **Option 3: Direct export**
+   **Available Options:**
    ```bash
-   export GEMINI_API_KEY=your-api-key
+   Options:
+     -V, --version            output version number
+     -k, --key <key>         Gemini API key (can also use GEMINI_API_KEY env var)
+     -m, --model <name>      Gemini model to use (default: "gemini-2.0-flash")
+     -l, --langsmith-key <key>  LangSmith API key for tracing (can also use LANGSMITH_API_KEY env var)
+     -t, --tracing           Enable tracing with LangSmith (default: false)
+     -h, --no-history        Disable chat history saving
+     --help                  display help for command
    ```
 
-2. Run GemChat:
+   **Examples:**
    ```bash
-   npx gemchat
+   # Using global installation
+   gemchat --key your-api-key
+   gemchat --model gemini-2.5-pro-exp-03-25
+
+   # Using npx
+   npx gemchat --key your-api-key
+   npx gemchat --tracing --langsmith-key your-langsmith-key
    ```
 
 ## Usage Examples
