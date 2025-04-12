@@ -1,6 +1,6 @@
 {
   "name": "gemchat",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "AI powered CLI assistant with file system capabilities",
   "main": "index.ts",
   "scripts": {

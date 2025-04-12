@@ -23,7 +23,7 @@ const program = new Command();
 program
   .name('gemchat')
   .description('AI powered CLI assistant with file system capabilities')
-  .version('2.0.2')
+  .version('2.0.3')
   .option('-k, --key <key>', 'Gemini API key (can also use GEMINI_API_KEY env var)')
   .option('-m, --model <name>', 'Gemini model to use', 'gemini-2.0-flash')
   .option('-l, --langsmith-key <key>', 'LangSmith API key for tracing (can also use LANGSMITH_API_KEY env var)')
@@ -69,8 +69,9 @@ function addChatMessage(role: ChatHistory['role'], content: string, name?: strin
 }
 
 const generateContent = traceable(async ({ toolCalling = false }: { toolCalling?: boolean } = {}) => {
+  let defaultModel  = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
   const generateConfig = {
-    model: options.model, // Use model from command line options
+    model: options.model || defaultModel,
     contents: chatHistory.map((msg) => `${msg.role}: ${msg.content}`).join('\n'),
     config: {}
   }
