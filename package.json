@@ -6,13 +6,19 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node index.ts",
+    "mcp-server": "ts-node mcp-server.ts",
     "build": "tsc",
     "prepare": "npm run build"
   },
   "keywords": [
     "ai",
     "chat",
-    "gemini"
+    "gemini",
+    "mcp",
+    "command-line",
+    "file-system",
+    "coding",
+    "assistant"
   ],
   "author": "Jefreesujit",
   "license": "MIT",
