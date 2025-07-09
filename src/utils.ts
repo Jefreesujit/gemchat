@@ -1,4 +1,4 @@
-import { fileFunctionDeclarations } from './tools';
+import { fileFunctionDeclarations } from './tools.declaration';
 import * as fs from 'fs';
 import * as path from 'path';
 
