@@ -12,8 +12,8 @@ export interface ChatHistory {
 
 /* -----------------Constants--------------- */
 // Add local fallback directory
-export const LOCAL_HISTORY_DIR = path.join(process.cwd(), '.gemchat', 'history');
-export const HISTORY_DIR = path.join(process.env.HOME || process.env.USERPROFILE || '.', '.gemchat', 'history');
+export const LOCAL_HISTORY_DIR = path.join(process.cwd(), '.cliffer', 'history');
+export const HISTORY_DIR = path.join(process.env.HOME || process.env.USERPROFILE || '.', '.cliffer', 'history');
 
 /* -----------------Tool Call Validation--------------- */
 export const validateToolCall = (funcCall: any, params: any): boolean => {
@@ -110,7 +110,7 @@ export async function saveChatHistory(history: ChatHistory[]) {
 
   // Format as YYYY-MM-DDTHH-mm-ss
   const timestamp = `${year}-${month}-${day}T${hours}-${minutes}-${seconds}`;
-  const filename = `gemchat-${timestamp}.txt`;
+  const filename = `cliffer-${timestamp}.txt`;
 
   try {
     const historyDir = await ensureHistoryDir();

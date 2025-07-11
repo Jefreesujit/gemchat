@@ -22,8 +22,8 @@ import {
 const program = new Command();
 
 program
-  .name('gemchat')
-  .description('AI powered CLI assistant with file system capabilities')
+  .name('cliffer')
+  .description('CLI based assistant with file system capabilities')
   .version('2.0.3')
   .option('-k, --key <key>', 'Gemini API key (can also use GEMINI_API_KEY env var)')
   .option('-m, --model <name>', 'Gemini model to use', 'gemini-2.0-flash')
@@ -144,7 +144,7 @@ async function processInput(input: string) {
   }
 }
 
-console.log('Welcome to GemChat, AI powered CLI assistant with file system capabilities.');
+console.log('Welcome to Cliffer, AI powered CLI assistant with file system capabilities.');
 console.log(`Using model: ${options.model}`);
 if (options.tracing) console.log('LangSmith tracing enabled');
 if (!options.history) console.log('Chat history saving disabled');
@@ -159,6 +159,6 @@ rl.on('line', async (line) => {
     console.log('\nSaving chat history before exit...');
     await saveChatHistory(chatHistory);
   }
-  console.log('Exiting GemChat. Goodbye!');
+  console.log('Exiting Cliffer. Goodbye!');
   process.exit(0);
 });
