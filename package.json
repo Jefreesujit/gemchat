@@ -35,6 +35,8 @@
     "ts-node": "^10.9.2"
   },
   "bin": {
-    "gemchat": "./dist/index.js"
+    "gemchat": "./dist/index.js",
+    "mcp": "./dist/mcp-server.js",
+    "chat": "./dist/index.js"
   }
 }

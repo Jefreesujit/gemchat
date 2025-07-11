@@ -1,10 +1,7 @@
 /* -----------------Globals--------------- */
-import { FunctionDeclaration, Type } from '@google/genai';
 import * as fs from 'fs';
 import * as path from 'path';
 import { traceable } from 'langsmith/traceable';
-
-import { fileFunctionDeclarations } from './tools.declaration';
 
 /* -----------------Tools--------------- */
 
