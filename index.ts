@@ -9,7 +9,8 @@ import { wrapSDK } from 'langsmith/wrappers';
 
 /* -----------------Local Imports--------------- */
 import { systemPrompt, followUpPrompt, errorHandlingPrompt } from './src/prompts';
-import { fileFunctionDeclarations, executeTool } from './src/tools';
+import { executeTool } from './src/tools';
+import { fileFunctionDeclarations } from './src/tools.declaration';
 import {
   processResponse,
   validateToolCall,
