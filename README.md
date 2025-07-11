@@ -1,6 +1,6 @@
-# GemChat
+# Cliffer
 
-GemChat is a AI powered CLI assistant with file system capabilities. Built with TypeScript, it provides an interactive interface for communicating with the Gemini AI model and includes tools to perform file system operations.
+Cliffer is a AI powered CLI assistant with file system capabilities. Built with TypeScript, it provides an interactive interface for communicating with the Gemini AI model and includes tools to perform file system operations.
 
 > **Disclaimer**: This project is not affiliated with, endorsed by, or associated with Google or the Gemini AI team. It is an independent project created for development and testing purposes only.
 
@@ -19,9 +19,9 @@ GemChat is a AI powered CLI assistant with file system capabilities. Built with 
 
 ## Installation & Setup
 
-1. Install GemChat globally:
+1. Install Cliffer globally:
 ```bash
-npm install -g gemchat
+npm install -g cliffer
 ```
 
 2. Set up your Gemini API key using one of these methods:
@@ -30,7 +30,7 @@ npm install -g gemchat
 ```bash
 # Add to .bashrc or .zshrc
 echo 'export GEMINI_API_KEY=your-api-key' >> ~/.bashrc
-source ~/.bashrc
+source ~/.zshrc
 ```
 
 **Option 2: Direct export**
@@ -38,14 +38,14 @@ source ~/.bashrc
 export GEMINI_API_KEY=your-api-key
 ```
 
-3. Run GemChat with available options:
+3. Run Cliffer with available options:
    ```bash
-   gemchat [options]
+   cliffer [options]
    ```
 
    Alternatively, you can run without installing globally using npx:
    ```bash
-   npx gemchat [options]
+   npx cliffer [options]
    ```
 
    **Available Options:**
@@ -63,17 +63,17 @@ export GEMINI_API_KEY=your-api-key
    **Examples:**
    ```bash
    # Using global installation
-   gemchat --key your-api-key
-   gemchat --model gemini-2.5-pro-exp-03-25
+   cliffer --key your-api-key
+   cliffer --model gemini-2.5-pro-exp-03-25
 
    # Using npx
-   npx gemchat --key your-api-key
-   npx gemchat --tracing --langsmith-key your-langsmith-key
+   npx cliffer --key your-api-key
+   npx cliffer --tracing --langsmith-key your-langsmith-key
    ```
 
 ## Usage Examples
 
-GemChat supports various file system operations through natural language commands:
+Cliffer supports various file system operations through natural language commands:
 
 1. **File Operations**
    ```bash
@@ -144,8 +144,8 @@ To set up the project for local development:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/jefreesujit/gemchat.git
-   cd gemchat
+   git clone https://github.com/jefreesujit/cliffer.git
+   cd cliffer
    ```
 
 2. Install dependencies:
@@ -202,4 +202,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 Before contributing, please make sure to read and follow our Code of Conduct.
 
-Thank you for your interest in contributing to GemChat!
+Thank you for your interest in contributing to Cliffer!

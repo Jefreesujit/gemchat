@@ -17,7 +17,7 @@ import {
 } from './src/tools';
 
 const server = new McpServer({
-  name: 'gemchat-tools',
+  name: 'cliffer',
   version: '1.0.0',
 });
 
