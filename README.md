@@ -71,6 +71,106 @@ export GEMINI_API_KEY=your-api-key
    npx cliffer --tracing --langsmith-key your-langsmith-key
    ```
 
+---
+
+## Cliffer File System MCP Server
+
+Cliffer includes a File System MCP (Model Context Protocol) server that exposes file and folder operations as MCP tools. This allows any MCP-compatible client to connect and interact with your local file system securely through the Cliffer server.
+
+### Starting the MCP Server
+
+To start the Cliffer MCP server (for file system operations):
+
+```bash
+npx cliffer mcp
+# or, if installed globally
+cliffer mcp
+```
+
+This will launch the server on standard input/output (stdio) and register all available file system tools (list, read, create, update, move, copy, delete, etc.).
+
+---
+
+### Connecting from Editors & Desktop Apps (VSCode, Cursor, Claude Desktop)
+
+Many modern editors and AI desktop apps now support the Model Context Protocol (MCP) for native tool integration. You can connect Cliffer's MCP server to these apps by providing a simple `mcp.json` configuration file.
+
+#### Example `mcp.json` for stdio (recommended for local Cliffer):
+
+```json
+{
+   "mcpServers": {
+      "cliffer": {
+         "command": "npx",
+         "args": ["cliffer", "mcp"],
+         "env": {}
+      }
+   }
+}
+```
+
+- Place this file where your editor/AI app expects MCP configs (see its documentation).
+- For VSCode (with MCP extension), open the MCP panel, click "Add MCP Server", and select or paste this config.
+- For Cursor/Claude Desktop, use their "Connect MCP Tool" or similar menu and provide this config.
+- You can use `npx cliffer mcp` in the `command` field if not installed globally.
+
+> **Tip:** You can run multiple MCP servers for different projects or scopes by customizing the `cwd` or `args`.
+
+---
+
+### Available MCP Tools
+
+- listDirectory
+- readFile
+- createFile
+- updateFile
+- createFolder
+- deleteFolder
+- renameFolder
+- searchFiles
+- moveFile
+- copyFile
+
+Each tool is fully typed and described in the server for easy client discovery.
+
+### Connecting from a MCP Client
+
+To connect to the Cliffer MCP server from an MCP-compatible client:
+
+1. **Ensure the server is running** (see above).
+2. **Configure your client** to connect via stdio, or use a compatible MCP client library that supports stdio transport.
+
+#### Example using @modelcontextprotocol/sdk (Node.js):
+
+```js
+import { McpClient } from '@modelcontextprotocol/sdk/client/mcp.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+
+const transport = new StdioClientTransport({
+  command: 'npx',
+  args: ['cliffer', 'mcp'], // or ['node', 'dist/mcp-server.js'] if running locally
+});
+const client = new McpClient(transport);
+await client.connect();
+
+// List directory
+const response = await client.callTool('listDirectory', { directory: '.' });
+console.log(response);
+```
+
+See the [Model Context Protocol documentation](https://modelcontext.org/) for more details and client libraries.
+
+#### Example using CLI (if available):
+
+Some MCP clients provide a CLI interface to connect to an MCP server. Refer to your client's documentation for details.
+
+### Security Note
+
+- The Cliffer MCP server exposes your local file system via tools. **Run it only in trusted environments.**
+- Only the directory where the server is started (and its subdirectories) are accessible.
+
+---
+
 ## Usage Examples
 
 Cliffer supports various file system operations through natural language commands:
